@@ -8,19 +8,23 @@ class AdminProvider with ChangeNotifier {
   List<dynamic> _inquiries = [];
   Map<String, dynamic>? _stats;
   bool _isLoading = false;
+  String? _error;
 
   List<dynamic> get announcements => _announcements;
   List<dynamic> get inquiries => _inquiries;
   Map<String, dynamic>? get stats => _stats;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
   Future<void> fetchStats() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _stats = await _adminService.getDashboardStats();
     } catch (e) {
-      print(e);
+      _error = e.toString();
+      print('Error fetching stats: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -29,11 +33,13 @@ class AdminProvider with ChangeNotifier {
 
   Future<void> fetchAnnouncements() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _announcements = await _adminService.getAnnouncements();
     } catch (e) {
-      print(e);
+      _error = e.toString();
+      print('Error fetching announcements: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -42,11 +48,13 @@ class AdminProvider with ChangeNotifier {
 
   Future<void> postAnnouncement(Map<String, dynamic> data) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       await _adminService.postAnnouncement(data);
       await fetchAnnouncements();
     } catch (e) {
+      _error = e.toString();
       rethrow;
     } finally {
       _isLoading = false;
@@ -56,11 +64,13 @@ class AdminProvider with ChangeNotifier {
 
   Future<void> fetchInquiries() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _inquiries = await _adminService.getInquiries();
     } catch (e) {
-      print(e);
+      _error = e.toString();
+      print('Error fetching inquiries: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -69,10 +79,12 @@ class AdminProvider with ChangeNotifier {
 
   Future<void> sendInquiry(String subject, String message) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       await _adminService.postInquiry({'subject': subject, 'message': message});
     } catch (e) {
+      _error = e.toString();
       rethrow;
     } finally {
       _isLoading = false;
@@ -81,21 +93,25 @@ class AdminProvider with ChangeNotifier {
   }
 
   Future<void> resolveInquiry(String id) async {
+    _error = null;
     try {
       await _adminService.resolveInquiry(id);
       await fetchInquiries();
     } catch (e) {
+      _error = e.toString();
       rethrow;
     }
   }
 
   Future<void> updateAnnouncement(String id, Map<String, dynamic> data) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       await _adminService.updateAnnouncement(id, data);
       await fetchAnnouncements();
     } catch (e) {
+      _error = e.toString();
       rethrow;
     } finally {
       _isLoading = false;
@@ -104,11 +120,13 @@ class AdminProvider with ChangeNotifier {
   }
 
   Future<void> deleteAnnouncement(String id) async {
+    _error = null;
     try {
       await _adminService.deleteAnnouncement(id);
       _announcements.removeWhere((a) => a['_id'] == id);
       notifyListeners();
     } catch (e) {
+      _error = e.toString();
       rethrow;
     }
   }
