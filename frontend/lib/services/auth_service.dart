@@ -65,4 +65,52 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
+
+  Future<Map<String, dynamic>> forgotPassword(
+    String email,
+    String studentId,
+  ) async {
+    // For now, consistent with other methods, we might assume there is an endpoint.
+    // However, if the backend is not ready, this might fail.
+    // We will implement the network call.
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/users/forgot-password'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body:
+          jsonEncode(<String, String>{'email': email, 'studentId': studentId}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      String? message;
+      try {
+        final dynamic body = jsonDecode(response.body);
+        message = body['message'];
+      } catch (_) {
+        // Fallback if decoding fails
+      }
+      throw Exception(
+          message ?? 'Server Error (${response.statusCode}): ${response.body}');
+    }
+  }
+
+  Future<void> resetPassword(String token, String newPassword) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/users/reset-password'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(
+          <String, String>{'token': token, 'newPassword': newPassword}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        jsonDecode(response.body)['message'] ?? 'Failed to reset password',
+      );
+    }
+  }
 }

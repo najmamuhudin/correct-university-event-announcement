@@ -99,13 +99,14 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.send),
+                  icon: const Icon(Icons.send, color: Colors.white),
                   label: const Text(
                     "Post Announcement",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3A4F9B),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

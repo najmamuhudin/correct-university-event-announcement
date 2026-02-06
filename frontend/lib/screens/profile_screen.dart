@@ -62,7 +62,6 @@ class ProfileScreen extends StatelessWidget {
                       () {},
                       trailing: "English",
                     ),
-                    _actionTile(Icons.help_outline, "Help & Support", () {}),
                   ]),
                   const SizedBox(height: 32),
                   _buildLogoutButton(context),

@@ -114,8 +114,75 @@ const generateToken = (id) => {
     });
 };
 
+/**
+ * @desc    Verify identity and get reset token
+ * @route   POST /api/users/forgot-password
+ * @access  Public
+ */
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email, studentId } = req.body;
+
+    // Verify user exists with matching email AND studentId
+    const user = await User.findOne({ email, studentId });
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found with provided Email and ID.');
+    }
+
+    // Generate a temporary reset token (valid for 15 mins)
+    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '15m',
+    });
+
+    // In a real app, you would send this via email.
+    // For this demo/mock, we return it to the client to proceed.
+    res.status(200).json({
+        message: 'Identity Verified. Proceed to reset password.',
+        token: resetToken,
+    });
+});
+
+/**
+ * @desc    Reset password using token
+ * @route   POST /api/users/reset-password
+ * @access  Public
+ */
+const resetPassword = asyncHandler(async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+        res.status(400);
+        throw new Error('Missing token or new password');
+    }
+
+    try {
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        await user.save();
+
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        res.status(400);
+        throw new Error('Invalid or expired token');
+    }
+});
+
 module.exports = {
     registerUser,
     loginUser,
     getMe,
+    forgotPassword,
+    resetPassword,
 };

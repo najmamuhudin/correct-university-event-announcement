@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/event_provider.dart';
@@ -61,11 +61,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _sectionTitle("Quick Actions"),
               const SizedBox(height: 12),
               _buildQuickActions(context),
-              const SizedBox(height: 24),
-              _sectionTitle("Engagement Overview"),
-              const SizedBox(height: 12),
-              _buildChart(),
-              const SizedBox(height: 24),
               _sectionTitle("Recent Activity"),
               const SizedBox(height: 12),
               _buildRecentActivity(stats),
@@ -276,67 +271,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  // ================= CHART =================
-  Widget _buildChart() {
-    return Container(
-      height: 220,
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
-      child: BarChart(
-        BarChartData(
-          borderData: FlBorderData(show: false),
-          gridData: FlGridData(show: false),
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, _) {
-                  const days = [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI",
-                    "SAT",
-                    "SUN",
-                  ];
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      value.toInt() >= 0 && value.toInt() < days.length
-                          ? days[value.toInt()]
-                          : '',
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          barGroups: List.generate(
-            7,
-            (i) => BarChartGroupData(
-              x: i,
-              barRods: [
-                BarChartRodData(
-                  toY: (i + 2).toDouble(),
-                  width: 18,
-                  borderRadius: BorderRadius.circular(6),
-                  color: i == 5
-                      ? Color(0xFF3A4F9B)
-                      : Color(0xFF3A4F9B).withOpacity(0.5),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 

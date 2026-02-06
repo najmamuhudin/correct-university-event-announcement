@@ -93,16 +93,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             children: [
               _uploadPoster(),
               const SizedBox(height: 24),
-
               _section("General Info"),
               _label("Event Title"),
               _input(_titleController, "e.g. Annual Tech Symposium"),
               const SizedBox(height: 16),
-
               _label("Category"),
               _categorySelector(),
               const SizedBox(height: 24),
-
               _section("Logistics"),
               Row(
                 children: [
@@ -112,7 +109,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-
               _label("Location"),
               _input(
                 _locationController,
@@ -120,24 +116,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 icon: Icons.location_on_outlined,
               ),
               const SizedBox(height: 24),
-
               _section("Description"),
               _descriptionBox(),
               const SizedBox(height: 24),
-
               _toggle(
                 title: "Send Push Notification",
                 subtitle: "Alert students immediately",
                 value: _pushNotification,
                 onChanged: (v) => setState(() => _pushNotification = v),
               ),
-              _toggle(
-                title: "Enable RSVP",
-                subtitle: "Collect attendance headcount",
-                value: _enableRSVP,
-                onChanged: (v) => setState(() => _enableRSVP = v),
-              ),
-
               const SizedBox(height: 32),
               _bottomButtons(),
             ],
@@ -199,13 +186,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   borderRadius: BorderRadius.circular(16),
                   child: kIsWeb
                       ? (_webImage != null
-                            ? Image.memory(
-                                _webImage!,
-                                width: double.infinity,
-                                height: 200,
-                                fit: BoxFit.cover,
-                              )
-                            : const Center(child: CircularProgressIndicator()))
+                          ? Image.memory(
+                              _webImage!,
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            )
+                          : const Center(child: CircularProgressIndicator()))
                       : Image.file(
                           File(_image!.path),
                           width: double.infinity,
@@ -351,32 +338,35 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   // ================= BOTTOM BUTTONS =================
   Widget _bottomButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () {},
-            child: const Text("Save Draft"),
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+          backgroundColor: const Color(0xFF3A4F9B),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        onPressed: _isSubmitting ? null : _submit,
+        child: _isSubmitting
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                widget.event == null ? "Publish Event" : "Save Changes",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            onPressed: _submit,
-            child: const Text("Publish Event"),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -466,12 +456,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   // ================= HELPERS =================
   Widget _section(String t) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Text(
-      t,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-    ),
-  );
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(
+          t,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      );
 
   Widget _label(String t) =>
       Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(t));
