@@ -5,6 +5,7 @@ import '../providers/event_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
 import '../utils/image_helper.dart';
+import 'registered_students_screen.dart';
 
 class EventDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> event;
@@ -26,6 +27,7 @@ class EventDetailsScreen extends StatelessWidget {
     final userId = user?['_id'];
     final attendees = (event['attendees'] as List?) ?? [];
     final bool isRegistered = userId != null && attendees.contains(userId);
+    final bool isAdmin = user?['role'] == 'admin';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -194,47 +196,59 @@ class EventDetailsScreen extends StatelessWidget {
             right: 20,
             bottom: 30,
             child: ElevatedButton(
-              onPressed: isRegistered
-                  ? null
-                  : () async {
-                      try {
-                        final eventId = event['_id'] ?? event['id'];
-                        if (eventId == null) {
-                          throw Exception('Invalid event ID');
-                        }
-                        await Provider.of<EventProvider>(
-                          context,
-                          listen: false,
-                        ).registerForEvent(eventId);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Registered successfully!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.toString()),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
+              onPressed: isAdmin
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => RegisteredStudentsScreen(
+                            attendeeIds: attendees,
+                          ),
+                        ),
+                      );
+                    }
+                  : isRegistered
+                      ? null
+                      : () async {
+                          try {
+                            final eventId = event['_id'] ?? event['id'];
+                            if (eventId == null) {
+                              throw Exception('Invalid event ID');
+                            }
+                            await Provider.of<EventProvider>(
+                              context,
+                              listen: false,
+                            ).registerForEvent(eventId);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Registered successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isRegistered ? Colors.grey : const Color(0xFF3A4F9B),
+                backgroundColor: (isRegistered && !isAdmin)
+                    ? Colors.grey
+                    : const Color(0xFF3A4F9B),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 4,
-                shadowColor: isRegistered
+                shadowColor: (isRegistered && !isAdmin)
                     ? Colors.transparent
                     : const Color(0xFF3A4F9B).withOpacity(0.4),
               ),
@@ -242,15 +256,23 @@ class EventDetailsScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    isRegistered ? 'Already Registered' : 'Register Now',
+                    isAdmin
+                        ? 'Event Registration'
+                        : isRegistered
+                            ? 'Already Registered'
+                            : 'Register Now',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (!isRegistered) ...[
+                  if (!isRegistered || isAdmin) ...[
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, size: 20),
+                    Icon(
+                        isAdmin
+                            ? Icons.list_alt_rounded
+                            : Icons.arrow_forward_rounded,
+                        size: 20),
                   ],
                 ],
               ),

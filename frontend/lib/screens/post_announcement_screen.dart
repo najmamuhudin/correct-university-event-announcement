@@ -15,9 +15,7 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
   late TextEditingController _titleController;
   late TextEditingController _messageController;
 
-  bool _urgent = false;
-  bool _pushNotification = true;
-  String _audience = "All Students";
+  List<String> _selectedStudentIds = [];
 
   @override
   void initState() {
@@ -29,9 +27,14 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
       text: widget.announcement?['message'],
     );
     if (widget.announcement != null) {
-      _urgent = widget.announcement!['urgent'] ?? false;
-      _audience = widget.announcement!['audience'] ?? "All Students";
+      _selectedStudentIds =
+          List<String>.from(widget.announcement!['targetIds'] ?? []);
     }
+
+    // Fetch students for the selector
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminProvider>(context, listen: false).fetchStudents();
+    });
   }
 
   @override
@@ -63,18 +66,15 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
                 style: TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 24),
-
               _label("Announcement Title"),
               _input(
                 controller: _titleController,
                 hint: "e.g. Fall Semester Registration Now Open",
               ),
               const SizedBox(height: 20),
-
               _label("Message Body"),
               _messageBox(),
               const SizedBox(height: 28),
-
               const Text(
                 "DELIVERY SETTINGS",
                 style: TextStyle(
@@ -84,51 +84,17 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-
-              _settingTile(
-                icon: Icons.warning_amber_rounded,
-                iconBg: Colors.orange.withOpacity(0.15),
-                title: "Urgent / High Priority",
-                trailing: Switch(
-                  value: _urgent,
-                  onChanged: (v) => setState(() => _urgent = v),
-                ),
-              ),
-
-              _settingTile(
-                icon: Icons.notifications_active,
-                iconBg: Color(0xFF3A4F9B).withOpacity(0.15),
-                title: "Push Notification",
-                subtitle: "Notify all students immediately",
-                trailing: Switch(
-                  value: _pushNotification,
-                  onChanged: (v) => setState(() => _pushNotification = v),
-                ),
-              ),
-
               _settingTile(
                 icon: Icons.groups_outlined,
                 iconBg: Colors.grey.withOpacity(0.15),
                 title: "Target Audience",
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _audience,
-                      style: const TextStyle(
-                        color: Color(0xFF3A4F9B),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.chevron_right, color: Colors.grey),
-                  ],
-                ),
-                onTap: () {},
+                subtitle: _selectedStudentIds.isEmpty
+                    ? "Visible to All Students"
+                    : "${_selectedStudentIds.length} Students Selected",
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: _showStudentSelector,
               ),
-
               const SizedBox(height: 36),
-
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -139,7 +105,7 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
                     style: TextStyle(fontSize: 16),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF3A4F9B),
+                    backgroundColor: const Color(0xFF3A4F9B),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -151,6 +117,122 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // ================= STUDENT SELECTOR =================
+  void _showStudentSelector() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Consumer<AdminProvider>(
+          builder: (context, provider, _) {
+            final students = provider.students;
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              maxChildSize: 0.9,
+              minChildSize: 0.5,
+              expand: false,
+              builder: (context, scrollController) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Select Target Audience",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                if (_selectedStudentIds.length ==
+                                    students.length) {
+                                  _selectedStudentIds.clear();
+                                } else {
+                                  _selectedStudentIds = students
+                                      .map((s) => s['_id'].toString())
+                                      .toList();
+                                }
+                              });
+                            },
+                            child: Text(
+                              _selectedStudentIds.length == students.length
+                                  ? "Deselect All"
+                                  : "Select All",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: provider.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView.builder(
+                              controller: scrollController,
+                              itemCount: students.length,
+                              itemBuilder: (context, index) {
+                                final student = students[index];
+                                final id = student['_id'];
+                                final isSelected =
+                                    _selectedStudentIds.contains(id);
+                                return CheckboxListTile(
+                                  value: isSelected,
+                                  title: Text(student['name'] ?? "Unknown"),
+                                  subtitle: Text(student['email'] ?? ""),
+                                  secondary: CircleAvatar(
+                                    backgroundColor: const Color(0xFF3A4F9B)
+                                        .withOpacity(0.1),
+                                    child: Text(
+                                      (student['name'] ?? "U")[0].toUpperCase(),
+                                      style: const TextStyle(
+                                          color: Color(0xFF3A4F9B)),
+                                    ),
+                                  ),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        _selectedStudentIds.add(id);
+                                      } else {
+                                        _selectedStudentIds.remove(id);
+                                      }
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3A4F9B),
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text("Done"),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -310,8 +392,9 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
       final data = {
         'title': _titleController.text.trim(),
         'message': _messageController.text.trim(),
-        'urgent': _urgent,
-        'audience': _audience,
+        'targetIds': _selectedStudentIds,
+        'audience':
+            _selectedStudentIds.isEmpty ? "All Students" : "Selected Students",
       };
 
       if (widget.announcement == null) {
@@ -335,9 +418,9 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
 
   // ================= HELPERS =================
   Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-  );
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
+      );
 
   InputDecoration _decoration(String hint) {
     return InputDecoration(

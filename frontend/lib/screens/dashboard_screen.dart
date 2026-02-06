@@ -92,10 +92,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.notifications_none),
-        ),
       ],
     );
   }
