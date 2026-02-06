@@ -91,7 +91,6 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
                 subtitle: _selectedStudentIds.isEmpty
                     ? "Visible to All Students"
                     : "${_selectedStudentIds.length} Students Selected",
-                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showStudentSelector,
               ),
               const SizedBox(height: 36),

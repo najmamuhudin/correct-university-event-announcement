@@ -123,13 +123,18 @@ class AdminProvider with ChangeNotifier {
   }
 
   Future<void> deleteAnnouncement(String id) async {
+    _isLoading = true;
     _error = null;
+    notifyListeners();
     try {
       await _adminService.deleteAnnouncement(id);
       _announcements.removeWhere((a) => a['_id'] == id);
-      notifyListeners();
     } catch (e) {
       _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

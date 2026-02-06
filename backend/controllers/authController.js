@@ -45,9 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password: hashedPassword, // Store hashed password only
         studentId,
-        role,
-        department: req.body.department || 'General',
-        year: req.body.year || 'Freshman'
+        role
     });
 
     if (user) {

@@ -8,9 +8,19 @@ const Announcement = require('../models/Announcement');
  * @returns {Array} List of announcements sorted by creation date (newest first)
  */
 const getAnnouncements = asyncHandler(async (req, res) => {
-    // Fetch all announcements from the database
-    // sort({ createdAt: -1 }) ensures the latest announcements appear first
-    const announcements = await Announcement.find().sort({ createdAt: -1 });
+    let query = {};
+
+    // If student, only show announcements for all students or specifically for them
+    if (req.user && req.user.role === 'student') {
+        query = {
+            $or: [
+                { audience: 'All Students' },
+                { targetIds: req.user._id }
+            ]
+        };
+    }
+
+    const announcements = await Announcement.find(query).sort({ createdAt: -1 });
     res.status(200).json(announcements);
 });
 
@@ -21,21 +31,22 @@ const getAnnouncements = asyncHandler(async (req, res) => {
  * @param   {Object} req.body - Contains title, message, urgent, and audience
  */
 const createAnnouncement = asyncHandler(async (req, res) => {
-    const { title, message, urgent, audience } = req.body;
+    const { title, message, urgent, audience, targetIds } = req.body;
 
-    // Validate required fields (assumes title and message are mandatory)
+    // Validate required fields
     if (!title || !message) {
         res.status(400);
         throw new Error('Please add a title and message');
     }
 
-    // Create the announcement linked to the creating admin user
+    // Create the announcement
     const announcement = await Announcement.create({
         title,
         message,
         urgent,
         audience,
-        admin: req.user._id // req.user is set by the protect middleware
+        targetIds,
+        admin: req.user._id
     });
 
     res.status(201).json(announcement);

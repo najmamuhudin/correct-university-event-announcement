@@ -5,6 +5,7 @@ const announcementSchema = mongoose.Schema({
     message: { type: String, required: true },
     urgent: { type: Boolean, default: false },
     audience: { type: String, default: 'All Students' },
+    targetIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     admin: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
