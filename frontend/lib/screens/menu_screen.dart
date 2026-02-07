@@ -17,6 +17,8 @@ class MenuScreen extends StatelessWidget {
     final user = Provider.of<AuthProvider>(context).user;
     const Color mainBlue = Color(0xFF3A4F9B);
 
+    final bool isAdmin = user?['role'] == 'admin';
+
     return Scaffold(
       backgroundColor: mainBlue,
       body: Padding(
@@ -24,7 +26,7 @@ class MenuScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // RESTORED: Profile Section from your original data
+            // Profile Section
             Row(
               children: [
                 Container(
@@ -47,7 +49,7 @@ class MenuScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?['name'] ?? 'naima abdi aziiz',
+                        user?['name'] ?? 'Guest',
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 18,
@@ -55,7 +57,7 @@ class MenuScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        user?['email'] ?? 'naima@gmail.com',
+                        user?['email'] ?? 'guest@gmail.com',
                         style: GoogleFonts.poppins(
                           color: Colors.white70,
                           fontSize: 12,
@@ -75,74 +77,86 @@ class MenuScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // RESTORED: Original Menu Labels with matching style
+            // Menu Items based on Role
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
-                children: [
-                  _buildMenuItem(context, Icons.home_outlined, 'Home', 0),
-                  _buildActionItem(context, Icons.info_outline, 'About', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AboutScreen(),
-                      ),
-                    );
-                    ZoomDrawer.of(context)?.close();
-                  }),
-                  _buildMenuItem(context, Icons.event_note, 'Event', 1),
-                  _buildMenuItem(
-                    context,
-                    Icons.campaign_outlined,
-                    'Announcements',
-                    2,
-                  ),
-                  _buildMenuItem(context, Icons.message_outlined, 'Message', 3),
-                  _buildActionItem(
-                    context,
-                    Icons.phone_outlined,
-                    'Contact',
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ContactScreen(),
+                children: isAdmin
+                    ? [
+                        _buildMenuItem(
+                            context, Icons.analytics_outlined, 'Dashboard', 0),
+                        _buildMenuItem(
+                            context, Icons.campaign_outlined, 'Updates', 1),
+                        _buildMenuItem(
+                            context, Icons.event_note_outlined, 'My Events', 2),
+                        _buildMenuItem(
+                            context, Icons.forum_outlined, 'Inbox', 3),
+                        _buildMenuItem(
+                            context, Icons.person_outline, 'Profile', 4),
+                        const SizedBox(height: 20),
+                        _buildActionItem(
+                          context,
+                          Icons.logout_rounded,
+                          'Log Out',
+                          () => _handleLogout(context),
                         ),
-                      );
-                      ZoomDrawer.of(context)?.close();
-                    },
-                  ),
-
-                  const SizedBox(height: 20),
-                  const SizedBox(
-                    width: 200,
-                    child: Divider(color: Colors.white24, thickness: 1),
-                  ),
-                  const SizedBox(height: 10),
-
-                  _buildActionItem(
-                    context,
-                    Icons.logout_rounded,
-                    'Log Out',
-                    () {
-                      Provider.of<AuthProvider>(
-                        context,
-                        listen: false,
-                      ).logout();
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                      ]
+                    : [
+                        _buildMenuItem(context, Icons.home_outlined, 'Home', 0),
+                        _buildActionItem(context, Icons.info_outline, 'About',
+                            () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AboutScreen(),
+                            ),
+                          );
+                          ZoomDrawer.of(context)?.close();
+                        }),
+                        _buildMenuItem(context, Icons.event_note, 'Event', 1),
+                        _buildMenuItem(
+                          context,
+                          Icons.campaign_outlined,
+                          'Announcements',
+                          2,
                         ),
-                        (route) => false,
-                      );
-                    },
-                  ),
-                ],
+                        _buildMenuItem(
+                            context, Icons.message_outlined, 'Message', 3),
+                        _buildActionItem(
+                          context,
+                          Icons.phone_outlined,
+                          'Contact',
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ContactScreen(),
+                              ),
+                            );
+                            ZoomDrawer.of(context)?.close();
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        _buildActionItem(
+                          context,
+                          Icons.logout_rounded,
+                          'Log Out',
+                          () => _handleLogout(context),
+                        ),
+                      ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _handleLogout(BuildContext context) {
+    Provider.of<AuthProvider>(context, listen: false).logout();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
     );
   }
 

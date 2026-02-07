@@ -63,7 +63,26 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
               const SizedBox(height: 20),
               _label("Message Body"),
               _messageBox(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+              const Row(
+                children: [
+                  Icon(Icons.people_outline, color: Colors.grey, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    "Target Audience: ",
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  Text(
+                    "All student",
+                    style: TextStyle(
+                      color: Color(0xFF3A4F9B),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 36),
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -195,7 +214,7 @@ class _PostAnnouncementScreenState extends State<PostAnnouncementScreen> {
         'title': _titleController.text.trim(),
         'message': _messageController.text.trim(),
         'targetIds': [],
-        'audience': "All Student",
+        'audience': "All student",
       };
 
       if (widget.announcement == null) {

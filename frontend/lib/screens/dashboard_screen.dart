@@ -42,6 +42,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final adminProvider = Provider.of<AdminProvider>(context);
     final stats = adminProvider.stats;
 
+    if (adminProvider.isLoading && stats == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FB),
       body: SafeArea(
@@ -107,8 +113,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
             child: _metricCard(
               title: "Total Students",
-              value: stats?['totalStudents']?.toString() ?? "12,450",
-              subtitle: stats != null ? "Registered" : "+2.4%",
+              value: stats?['totalStudents']?.toString() ?? "0",
+              subtitle: stats != null ? "Registered" : "Loading...",
               icon: Icons.groups,
               subtitleColor: Colors.green,
             ),
@@ -123,10 +129,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
             child: _metricCard(
               title: "Active Events",
-              value: stats?['activeEvents']?.toString() ?? "18",
+              value: stats?['activeEvents']?.toString() ?? "0",
               subtitle: "Live Now",
               icon: Icons.calendar_today,
-              subtitleColor: Color(0xFF3A4F9B),
+              subtitleColor: const Color(0xFF3A4F9B),
             ),
           ),
         ),
@@ -194,7 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  stats?['pendingInquiries']?.toString() ?? "5",
+                  stats?['pendingInquiries']?.toString() ?? "0",
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,

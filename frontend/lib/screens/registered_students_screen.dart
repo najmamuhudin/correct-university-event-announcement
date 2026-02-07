@@ -16,8 +16,11 @@ class _RegisteredStudentsScreenState extends State<RegisteredStudentsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        Provider.of<AdminProvider>(context, listen: false).fetchStudents());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<AdminProvider>(context, listen: false).fetchStudents();
+      }
+    });
   }
 
   @override

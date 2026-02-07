@@ -9,7 +9,6 @@ import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-  //hi login
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -23,10 +22,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
     try {
-      await Provider.of<AuthProvider>(
-        context,
-        listen: false,
-      ).login(_emailController.text.trim(), _passwordController.text.trim());
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      await auth.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
       if (mounted) {
         Navigator.of(context).pushReplacement(

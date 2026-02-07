@@ -36,9 +36,8 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildInfoCard([
                     _infoTile(Icons.email_outlined, "Email", email),
-                    if (!isAdmin) ...[
+                    if (!isAdmin)
                       _infoTile(Icons.badge_outlined, "Student ID", studentId),
-                    ],
                     _infoTile(
                       Icons.security_outlined,
                       "Role",

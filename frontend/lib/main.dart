@@ -7,7 +7,6 @@ import 'providers/admin_provider.dart';
 import 'providers/navigation_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/zoom_drawer_screen.dart';
-import 'screens/main_navigation_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
@@ -45,9 +44,7 @@ class MyApp extends StatelessWidget {
             ),
             themeMode: ThemeMode.light,
             home: auth.isAuthenticated
-                ? (auth.user?['role'] == 'admin'
-                      ? const MainNavigationScreen()
-                      : const ZoomDrawerScreen())
+                ? const ZoomDrawerScreen()
                 : const LoginScreen(),
           );
         },
